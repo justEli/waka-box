@@ -844,7 +844,7 @@ module.exports = (function(e, t) {
     const p = new n(u);
     const c = new s({ auth: `token ${a}` });
     async function main() {
-      const e = await p.getMyStats({ range: i.LAST_7_DAYS });
+      const e = await p.getMyStats({ range: i.LAST_YEAR });
       await updateGist(e);
     }
     function trimRightStr(e, t) {
@@ -862,12 +862,11 @@ module.exports = (function(e, t) {
         const n = e.data.languages[t];
         const { name: i, percent: s, text: o } = n;
         const a = [
-          trimRightStr(i, 10).padEnd(10),
-          o.padEnd(14),
-          generateBarChart(s, 21),
+          trimRightStr(i, 12).padEnd(12),
+          generateBarChart(s, 30),
           String(s.toFixed(1)).padStart(5) + "%"
         ];
-        r.push(a.join(" "));
+        r.push(a.join("  "));
       }
       if (r.length == 0) return;
       try {

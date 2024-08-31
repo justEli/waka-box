@@ -13,7 +13,7 @@ const wakatime = new WakaTimeClient(wakatimeApiKey);
 const octokit = new Octokit({ auth: `token ${githubToken}` });
 
 async function main() {
-  const stats = await wakatime.getMyStats({ range: RANGE.LAST_7_DAYS });
+  const stats = await wakatime.getMyStats({ range: RANGE.LAST_YEAR });
   await updateGist(stats);
 }
 
@@ -66,12 +66,12 @@ async function updateGist(stats) {
 
 function generateBarChart(percent, size) {
   const filledCells = Math.round((size * percent) / 100);
-  
+
   if (filledCells >= size) {
-    return '▓'.repeat(size);
+    return "▓".repeat(size);
   }
 
-  return '▓'.repeat(filledCells).padEnd(size, '░');
+  return "▓".repeat(filledCells).padEnd(size, "░");
 }
 
 (async () => {
