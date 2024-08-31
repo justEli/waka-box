@@ -875,7 +875,7 @@ module.exports = (function(e, t) {
           gist_id: o,
           files: {
             [e]: {
-              filename: `👨‍💻 Development breakdown of the past year`,
+              filename: `💻 Development of the past year`,
               content: r.join("\n")
             }
           }
