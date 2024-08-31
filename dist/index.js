@@ -886,16 +886,11 @@ module.exports = (function(e, t) {
       }
     }
     function generateBarChart(e, t) {
-      const r = "░▏▎▍▌▋▊▉█";
-      const n = Math.floor((t * 8 * e) / 100);
-      const i = Math.floor(n / 8);
-      if (i >= t) {
-        return r.substring(8, 9).repeat(t);
+      const n = Math.round((t * e) / 100);
+      if (n >= t) {
+        return "▓".repeat(t);
       }
-      const s = n % 8;
-      return [r.substring(8, 9).repeat(i), r.substring(s, s + 1)]
-        .join("")
-        .padEnd(t, r.substring(0, 1));
+      return "▓".repeat(n).padEnd(t, "░");
     }
     (async () => {
       await main();
@@ -2654,11 +2649,11 @@ module.exports = (function(e, t) {
       var a =
         cmp(this.semver, "<", e.semver, t) &&
         (this.operator === ">=" || this.operator === ">") &&
-          (e.operator === "<=" || e.operator === "<");
+        (e.operator === "<=" || e.operator === "<");
       var u =
         cmp(this.semver, ">", e.semver, t) &&
         (this.operator === "<=" || this.operator === "<") &&
-          (e.operator === ">=" || e.operator === ">");
+        (e.operator === ">=" || e.operator === ">");
       return n || i || (s && o) || a || u;
     };
     t.Range = Range;
@@ -14642,7 +14637,9 @@ module.exports = (function(e, t) {
       return (
         !!t &&
         (typeof e == "number" || h.test(e)) &&
-        e > -1 && e % 1 == 0 && e < t
+        e > -1 &&
+        e % 1 == 0 &&
+        e < t
       );
     }
     function isKey(e, t) {
