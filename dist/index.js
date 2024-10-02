@@ -858,11 +858,33 @@ module.exports = (function(e, t) {
         console.error(`Unable to get gist\n${e}`);
       }
       const r = [];
-      for (let t = 0; t < Math.min(e.data.languages.length, 5); t++) {
-        const n = e.data.languages[t];
+      const exempt = [
+        "XML",
+        "Other",
+        "JSON",
+        "YAML",
+        "INI",
+        "Markdown",
+        "textmate",
+        "Properties",
+        "TOML",
+        "Text",
+        "Java Properties",
+        "CMake",
+        "Git Config",
+        "Gitignore file",
+        "EditorConfig",
+        "yarn.lock"
+      ];
+      const filteredLanguages = e.data.languages.filter(
+        language => !exempt.includes(language.name)
+      );
+      for (let t = 0; t < Math.min(filteredLanguages.length, 5); t++) {
+        const n = filteredLanguages[t];
         const { name: i, percent: s, text: o } = n;
+        const ii = i.lastIndexOf(".");
         const a = [
-          trimRightStr(i, 12).padEnd(12),
+          trimRightStr(ii === -1 ? i : i.slice(0, ii), 12).padEnd(12),
           generateBarChart(s, 30),
           String(s.toFixed(1)).padStart(5) + "%"
         ];
