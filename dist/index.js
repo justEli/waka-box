@@ -851,13 +851,12 @@ module.exports = (function(e, t) {
       return e.length > t ? e.substring(0, t - 3) + "..." : e;
     }
     async function updateGist(e) {
-      let t;
       try {
-        t = await c.gists.get({ gist_id: o });
-      } catch (e) {
-        console.error(`Unable to get gist\n${e}`);
+        await c.gists.get({ gist_id: o });
+      } catch (error) {
+        console.error(`Unable to get gist\n${error}`);
       }
-      const r = [];
+
       const exempt = [
         "XML",
         "Other",
@@ -876,48 +875,57 @@ module.exports = (function(e, t) {
         "EditorConfig",
         "yarn.lock"
       ];
-      const totalExemptPercentage = e.data.languages
-        .filter(language => exempt.includes(language.name))
-        .reduce((sum, language) => sum + language.percent, 0);
-      const adjustmentFactor =
-        totalExemptPercentage > 0 ? 100 / (100 - totalExemptPercentage) : 1;
-      const filteredLanguages = e.data.languages.filter(
-        language => !exempt.includes(language.name)
-      );
+
       const languageMapping = {
         Vue: ["Vue", "CSS", "HTML"],
         "C/C++": ["C", "C++"]
       };
+
+      const totalExemptPercentage = e.data.languages
+        .filter(lang => exempt.includes(lang.name))
+        .reduce((sum, lang) => sum + lang.percent, 0);
+
+      const adjustmentFactor =
+        totalExemptPercentage > 0 ? 100 / (100 - totalExemptPercentage) : 1;
       const combinedLanguages = {};
-      filteredLanguages.forEach(({ name, percent }) => {
-        const adjustedPercent = percent * adjustmentFactor;
-        const combinedName = Object.entries(
-          languageMapping
-        ).find(([key, values]) => values.includes(name))?.[0];
-        if (combinedName) {
-          combinedLanguages[combinedName] =
-            (combinedLanguages[combinedName] || 0) + adjustedPercent;
-        } else {
-          const ii = name.lastIndexOf(".");
-          r.push(
-            [
-              trimRightStr(ii === -1 ? name : name.slice(0, ii), 12).padEnd(12),
-              generateBarChart(adjustedPercent, 30),
-              String(adjustedPercent.toFixed(1)).padStart(5) + "%"
-            ].join("  ")
-          );
-        }
-      });
-      for (const [name, totalPercent] of Object.entries(combinedLanguages)) {
-        const ii = name.lastIndexOf(".");
-        r.push(
-          [
-            trimRightStr(ii === -1 ? name : name.slice(0, ii), 12).padEnd(12),
-            generateBarChart(totalPercent, 30),
-            String(totalPercent.toFixed(1)).padStart(5) + "%"
-          ].join("  ")
-        );
-      }
+
+      // Process languages
+      e.data.languages
+        .filter(lang => !exempt.includes(lang.name))
+        .forEach(({ name, percent }) => {
+          const adjustedPercent = percent * adjustmentFactor;
+          const combinedName = Object.entries(
+            languageMapping
+          ).find(([_, values]) => values.includes(name))?.[0];
+
+          if (combinedName) {
+            combinedLanguages[combinedName] =
+              (combinedLanguages[combinedName] || 0) + adjustedPercent;
+          } else {
+            combinedLanguages[name] =
+              (combinedLanguages[name] || 0) + adjustedPercent;
+          }
+        });
+
+      // Create an array from combined languages and sort it
+      const resultArray = Object.entries(combinedLanguages)
+        .map(([name, totalPercent]) => ({
+          name,
+          totalPercent,
+          barChart: generateBarChart(totalPercent, 30),
+          formattedPercent: String(totalPercent.toFixed(1)).padStart(5) + "%"
+        }))
+        .sort((a, b) => b.totalPercent - a.totalPercent) // Sort by percentage descending
+        .slice(0, 5); // Limit to top 5 items
+
+      // Format the final output
+      const r = resultArray.map(
+        ({ name, totalPercent, barChart, formattedPercent }) =>
+          [trimRightStr(name, 12).padEnd(12), barChart, formattedPercent].join(
+            "  "
+          )
+      );
+
       if (r.length == 0) return;
       try {
         const e = Object.keys(t.data.files)[0];
