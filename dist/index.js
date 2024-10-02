@@ -876,6 +876,11 @@ module.exports = (function(e, t) {
         "EditorConfig",
         "yarn.lock"
       ];
+      const totalExemptPercentage = e.data.languages
+        .filter(language => exempt.includes(language.name))
+        .reduce((sum, language) => sum + language.percent, 0);
+      const adjustmentFactor =
+        totalExemptPercentage > 0 ? 100 / (100 - totalExemptPercentage) : 1;
       const filteredLanguages = e.data.languages.filter(
         language => !exempt.includes(language.name)
       );
@@ -883,10 +888,11 @@ module.exports = (function(e, t) {
         const n = filteredLanguages[t];
         const { name: i, percent: s, text: o } = n;
         const ii = i.lastIndexOf(".");
+        const adjustedPercent = s * adjustmentFactor;
         const a = [
           trimRightStr(ii === -1 ? i : i.slice(0, ii), 12).padEnd(12),
-          generateBarChart(s, 30),
-          String(s.toFixed(1)).padStart(5) + "%"
+          generateBarChart(adjustedPercent, 30),
+          String(adjustedPercent.toFixed(1)).padStart(5) + "%"
         ];
         r.push(a.join("  "));
       }
