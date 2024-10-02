@@ -884,17 +884,39 @@ module.exports = (function(e, t) {
       const filteredLanguages = e.data.languages.filter(
         language => !exempt.includes(language.name)
       );
-      for (let t = 0; t < Math.min(filteredLanguages.length, 5); t++) {
-        const n = filteredLanguages[t];
-        const { name: i, percent: s, text: o } = n;
-        const ii = i.lastIndexOf(".");
-        const adjustedPercent = s * adjustmentFactor;
-        const a = [
-          trimRightStr(ii === -1 ? i : i.slice(0, ii), 12).padEnd(12),
-          generateBarChart(adjustedPercent, 30),
-          String(adjustedPercent.toFixed(1)).padStart(5) + "%"
-        ];
-        r.push(a.join("  "));
+      const languageMapping = {
+        Vue: ["Vue", "CSS", "HTML"],
+        "C/C++": ["C", "C++"]
+      };
+      const combinedLanguages = {};
+      filteredLanguages.forEach(({ name, percent }) => {
+        const adjustedPercent = percent * adjustmentFactor;
+        const combinedName = Object.entries(
+          languageMapping
+        ).find(([key, values]) => values.includes(name))?.[0];
+        if (combinedName) {
+          combinedLanguages[combinedName] =
+            (combinedLanguages[combinedName] || 0) + adjustedPercent;
+        } else {
+          const ii = name.lastIndexOf(".");
+          r.push(
+            [
+              trimRightStr(ii === -1 ? name : name.slice(0, ii), 12).padEnd(12),
+              generateBarChart(adjustedPercent, 30),
+              String(adjustedPercent.toFixed(1)).padStart(5) + "%"
+            ].join("  ")
+          );
+        }
+      });
+      for (const [name, totalPercent] of Object.entries(combinedLanguages)) {
+        const ii = name.lastIndexOf(".");
+        r.push(
+          [
+            trimRightStr(ii === -1 ? name : name.slice(0, ii), 12).padEnd(12),
+            generateBarChart(totalPercent, 30),
+            String(totalPercent.toFixed(1)).padStart(5) + "%"
+          ].join("  ")
+        );
       }
       if (r.length == 0) return;
       try {
