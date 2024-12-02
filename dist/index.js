@@ -878,7 +878,8 @@ module.exports = (function(e, t) {
       ];
       const languageMapping = {
         Vue: ["Vue", "CSS", "HTML"],
-        "C/C++": ["C", "C++"]
+        "C/C++": ["C", "C++"],
+        "SQL/CQL": ["SQL", "Cassandra CQL"],
       };
       const totalExemptPercentage = e.data.languages
         .filter(language => exempt.includes(language.name))
