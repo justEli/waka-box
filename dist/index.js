@@ -877,29 +877,39 @@ module.exports = (function(e, t) {
         "yarn.lock"
       ];
       const languageMapping = {
-        Vue: ["Vue", "CSS", "HTML"],
+        Vue: ["Vue", "Vue.js", "CSS", "HTML"],
         "C/C++": ["C", "C++"],
-        "SQL/CQL": ["SQL", "Cassandra CQL"],
+        "SQL/CQL": ["SQL", "Cassandra CQL"]
       };
+      const lookup = {};
+      for (const [group, members] of Object.entries(languageMapping)) {
+        for (const member of members) lookup[member] = group;
+      }
       const totalExemptPercentage = e.data.languages
         .filter(language => exempt.includes(language.name))
         .reduce((sum, language) => sum + language.percent, 0);
       const adjustmentFactor =
         totalExemptPercentage > 0 ? 100 / (100 - totalExemptPercentage) : 1;
-      const filteredLanguages = e.data.languages.filter(
-        language => !exempt.includes(language.name)
-      );
-      for (let t = 0; t < Math.min(filteredLanguages.length, 5); t++) {
-        const n = filteredLanguages[t];
-        const { name: i, percent: s, text: o } = n;
-        const ii = i.lastIndexOf(".");
-        const adjustedPercent = s * adjustmentFactor;
-        const a = [
-          trimRightStr(ii === -1 ? i : i.slice(0, ii), 12).padEnd(12),
-          generateBarChart(adjustedPercent, 30),
-          String(adjustedPercent.toFixed(1)).padStart(5) + "%"
-        ];
-        r.push(a.join("  "));
+      const totals = {};
+      for (const language of e.data.languages) {
+        if (exempt.includes(language.name)) continue;
+        const dot = language.name.lastIndexOf(".");
+        const shortName = dot === -1 ? language.name : language.name.slice(0, dot);
+        const key = lookup[language.name] || lookup[shortName] || shortName;
+        totals[key] = (totals[key] || 0) + language.percent;
+      }
+      const merged = Object.entries(totals)
+        .map(([name, percent]) => ({ name, percent: percent * adjustmentFactor }))
+        .sort((a, b) => b.percent - a.percent)
+        .slice(0, 5);
+      for (const { name, percent } of merged) {
+        r.push(
+          [
+            trimRightStr(name, 12).padEnd(12),
+            generateBarChart(percent, 30),
+            String(percent.toFixed(1)).padStart(5) + "%"
+          ].join("  ")
+        );
       }
       if (r.length == 0) return;
       try {
