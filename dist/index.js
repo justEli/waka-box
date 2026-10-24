@@ -879,7 +879,7 @@ module.exports = (function(e, t) {
       const languageMapping = {
         Vue: ["Vue", "Vue.js", "CSS", "HTML"],
         "C/C++": ["C", "C++"],
-        "SQL/CQL": ["SQL", "Cassandra CQL"]
+        "CQL": ["Cassandra CQL"]
       };
       const lookup = {};
       for (const [group, members] of Object.entries(languageMapping)) {
